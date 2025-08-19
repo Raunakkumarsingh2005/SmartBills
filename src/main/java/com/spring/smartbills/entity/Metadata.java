@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -19,7 +21,10 @@ public class Metadata {
     private Long id;
 
     @Column(nullable = false)
-    private String fileName;
+    private String uniqueFileName;
+
+    @Column(nullable = false)
+    private String title;
 
     @CreatedDate
     private Date createdOn;
@@ -29,5 +34,10 @@ public class Metadata {
 
     @Column(nullable = false)
     private String filePath;
+
+    private LocalDate duedate;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean reminderSent;
 
 }

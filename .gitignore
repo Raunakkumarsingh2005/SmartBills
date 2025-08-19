@@ -20,6 +20,8 @@ target/
 *.ipr
 
 application.properties
+upload
+uploads
 
 ### NetBeans ###
 /nbproject/private/
