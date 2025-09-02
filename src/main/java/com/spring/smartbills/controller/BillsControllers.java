@@ -31,7 +31,9 @@ public class BillsControllers {
                     .body(new ResponseDto(ResponseContants.STATUS_400, ResponseContants.MESSAGE_400));
         }
 
-        return billsService.uploadBill(file, metadata);
+        billsService.uploadBill(file, metadata);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseDto("200", ResponseContants.MESSAGE_200));
     }
 
     @GetMapping("/bill")
@@ -42,5 +44,20 @@ public class BillsControllers {
     @DeleteMapping("/bill")
     public ResponseEntity<ResponseDto> DeleteBillById(@RequestParam("id") Long id) {
         return billsService.deleteBillById(id);
+    }
+
+    @GetMapping("/bill/download/{id}")
+    public ResponseEntity<?> downloadBills(@PathVariable Long id) {
+        return billsService.downloadBillById(id);
+    }
+
+    @GetMapping("/bill/preview/{id}")
+    public ResponseEntity<?> previewBillById(@PathVariable Long id) {
+        return billsService.previewBillById(id);
+    }
+
+    @GetMapping("/bill/search")
+    public ResponseEntity<?> searchBillsByTitle(@RequestParam String title) {
+        return billsService.searchBillByTitle(title);
     }
 }

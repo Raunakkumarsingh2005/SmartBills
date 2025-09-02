@@ -7,22 +7,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Entity
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-public class Metadata {
+@Getter@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Document(indexName = "bill")
+public class BillSearch {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @Column(nullable = false)
-    private String uniqueFileName;
+    private String id;
 
     @Column(nullable = false)
     private String title;
@@ -33,13 +31,8 @@ public class Metadata {
     @Column(nullable = false)
     private String category;
 
-    @Column(nullable = false)
-    private String filePath;
-
-    private LocalDate duedate;
-
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean reminderSent;
+//    @Field(type = FieldType.Date, pattern = "yyyy-MM-dd")
+//    private LocalDate duedate;
 
     private String venderName;
 

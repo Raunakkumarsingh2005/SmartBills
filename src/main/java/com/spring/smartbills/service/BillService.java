@@ -6,6 +6,7 @@ import com.spring.smartbills.entity.Metadata;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 public interface BillService {
@@ -16,4 +17,10 @@ public interface BillService {
     ResponseEntity<List<Metadata>> getAllBills();
 
     ResponseEntity<ResponseDto> deleteBillById(Long id);
+
+    ResponseEntity<?> downloadBillById(Long id);
+
+    ResponseEntity<?> previewBillById(Long billId);
+
+    ResponseEntity<?> searchBillByTitle(String title);
 }

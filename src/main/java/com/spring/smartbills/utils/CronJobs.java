@@ -1,19 +1,19 @@
 package com.spring.smartbills.utils;
 
 import com.spring.smartbills.entity.Metadata;
-import com.spring.smartbills.repository.BillRepository;
+import com.spring.smartbills.repository.MetadataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
 public class CronJobs {
     @Autowired
-    BillRepository billRepository;
+    MetadataRepository metadataRepository;
+            ;
 
     @Autowired
     EmailService emailService;
@@ -21,7 +21,7 @@ public class CronJobs {
     @Scheduled(cron = "0 54 14 * * *")
     // reminder will be given if reminderSent is set to false
     public void sendreminder() {
-        List<Metadata> list = billRepository.findByDuedateAndReminderSent(LocalDate.now().plusDays(7), false);
+        List<Metadata> list = metadataRepository.findByDuedateAndReminderSent(LocalDate.now().plusDays(7), false);
         for (Metadata m : list) {
             try{
                 //TODO add proper mail messages before sending it to production.
