@@ -4,11 +4,16 @@ import com.spring.smartbills.contants.ResponseContants;
 import com.spring.smartbills.dtos.BillUploadDto;
 import com.spring.smartbills.dtos.ResponseDto;
 import com.spring.smartbills.entity.Metadata;
+import com.spring.smartbills.entity.User;
 import com.spring.smartbills.service.BillService;
 import com.spring.smartbills.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,17 +28,17 @@ public class BillsControllers {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @PostMapping("bill/upload")
-    public ResponseEntity<ResponseDto> uploadBill(@RequestPart("file") MultipartFile file, @RequestPart("metadata") BillUploadDto metadata) {
+    public ResponseEntity<ResponseDto> uploadBill(@RequestPart("file") MultipartFile file,@Validated @RequestPart("metadata") BillUploadDto metadata) {
         if (file == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseDto(ResponseContants.STATUS_400, ResponseContants.MESSAGE_400));
         }
 
-        billsService.uploadBill(file, metadata);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseDto("200", ResponseContants.MESSAGE_200));
+        return billsService.uploadBill(file, metadata);
     }
 
     @GetMapping("/bill")

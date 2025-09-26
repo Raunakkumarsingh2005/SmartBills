@@ -6,21 +6,25 @@ import com.spring.smartbills.dtos.ResponseDto;
 import com.spring.smartbills.entity.BillSearch;
 import com.spring.smartbills.entity.Category;
 import com.spring.smartbills.entity.Metadata;
+import com.spring.smartbills.entity.User;
 import com.spring.smartbills.mapper.MetadataMapper;
 import com.spring.smartbills.repository.BillSearchRepository;
 import com.spring.smartbills.repository.CategoryRepository;
 import com.spring.smartbills.repository.MetadataRepository;
+import com.spring.smartbills.repository.UserRepository;
 import com.spring.smartbills.service.BillService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -51,57 +56,81 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     private MetadataMapper metadataMapper;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public ResponseEntity<ResponseDto> uploadBill(MultipartFile file, BillUploadDto metadata) {
-        Path filePath;
-        String fileName;
-        try {
-            String uploadDir = uploadUrl;
-            Path uploadPath = Paths.get(uploadDir);
 
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectory(uploadPath);
-            }
-
-            // create filepath
-            fileName = uniqueFileName(file);
-            filePath = Paths.get(uploadDir, fileName);
-
-            // write the actual file
-            Files.write(filePath, file.getBytes());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto(ResponseContants.STATUS_400, "Unable to upload file"));
+        if (file.isEmpty() || metadata == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("400", "File or metadata missing"));
         }
 
+        //  TODO resolve logical error : skipping the category check
+        // Map DTO to entity
         Metadata data = metadataMapper.maptoMetadata(metadata);
-        data.setUniqueFileName(fileName);
-        data.setFilePath(String.valueOf(filePath));
-        if (data == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto(ResponseContants.STATUS_400, "Metadata not found"));
-        }
 
+        // Validate category
         Optional<Category> categoryOpt = categoryRepository.findByCategoryName(data.getCategory());
         if (categoryOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseDto(ResponseContants.STATUS_400, "Category does not exist"));
         }
-        // saving the data in sql db
+
+        String fileName;
+        Path filePath;
+
+        try {
+            System.out.println("1");
+            // Ensure upload directory exists
+            Path uploadPath = Paths.get(uploadUrl);
+            if (!Files.exists(uploadPath)) {
+                System.out.println("2");
+                Files.createDirectories(uploadPath); // safer than createDirectory
+            }
+
+            // Create unique filename & path
+            fileName = uniqueFileName(file);
+            filePath = uploadPath.resolve(fileName);
+            System.out.println("3");
+
+            // Write file bytes
+            Files.write(filePath, file.getBytes());
+            System.out.println("4");
+        } catch (IOException e) {
+            System.out.println("5");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseDto(ResponseContants.STATUS_400, "Unable to upload file"));
+        }
+
+        // Set file info in metadata
+        data.setUniqueFileName(fileName);
+        data.setFilePath(filePath.toString());
+
+
+
+        // ⚠️ This null check is redundant → data is never null here
+        // if (data == null) { ... } → should be removed
+
+        // Save to SQL DB
         metadataRepository.save(data);
 
-        // saving the data in elastic search nosql db
+        // Save to Elasticsearch
         BillSearch doc = new BillSearch();
         doc.setId(data.getId().toString());
         doc.setCategory(data.getCategory());
         doc.setTitle(data.getTitle());
         doc.setVenderName(data.getVenderName());
-//        doc.setDuedate(data.getDuedate());
+        // doc.setDuedate(data.getDuedate()); // uncomment if field exists
         doc.setCreatedOn(data.getCreatedOn());
 
         billSearchRepository.save(doc);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto("201", ResponseContants.MESSAGE_200));
+        // Return response
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseDto(ResponseContants.STATUS_200, ResponseContants.MESSAGE_200));
     }
+
 
     @Override
     public String uniqueFileName(MultipartFile file) {
@@ -117,7 +146,9 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public ResponseEntity<List<Metadata>> getAllBills() {
-        List<Metadata> metadataList = metadataRepository.findAll();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUserName(username).orElseThrow(() -> new RuntimeException("User not found"));
+        List<Metadata> metadataList = metadataRepository.findByOwner(user);
         return ResponseEntity.status(HttpStatus.OK).body(metadataList);
     }
 
@@ -158,6 +189,7 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<?> downloadBillById(Long billId) {
         Optional<Metadata> metadataOpt = metadataRepository.findById(billId);
+
 
         if (metadataOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

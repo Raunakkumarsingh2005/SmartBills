@@ -19,9 +19,9 @@ target/
 *.iml
 *.ipr
 
-application.properties
-upload
-uploads
+**/application.yml
+upload/
+uploads/
 
 ### NetBeans ###
 /nbproject/private/

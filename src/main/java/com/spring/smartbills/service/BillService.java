@@ -3,7 +3,9 @@ package com.spring.smartbills.service;
 import com.spring.smartbills.dtos.BillUploadDto;
 import com.spring.smartbills.dtos.ResponseDto;
 import com.spring.smartbills.entity.Metadata;
+import com.spring.smartbills.entity.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.MalformedURLException;
