@@ -32,7 +32,7 @@ public class User {
     @NotBlank
     @Size(max = 20)
     @Column(name = "username")
-    private String userName;
+    private String username;
 
     @NotBlank
     @Size(max = 50)
@@ -67,14 +67,14 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedDate;
 
-    public User(String userName, String email, String password) {
-        this.userName = userName;
+    public User(String username, String email, String password) {
+        this.username = username;
         this.email = email;
         this.password = password;
     }
 
-    public User(String userName, String email) {
-        this.userName = userName;
+    public User(String username, String email) {
+        this.username = username;
         this.email = email;
     }
 
@@ -99,12 +99,12 @@ public class User {
         return this;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public User setUserName(String userName) {
-        this.userName = userName;
+    public User setUsername(String username) {
+        this.username = username;
         return this;
     }
 
@@ -226,4 +226,3 @@ public class User {
         return this;
     }
 }
-

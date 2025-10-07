@@ -32,7 +32,7 @@ public class CronJobs {
         }
 
         for (Metadata bill : billsDueTomorrow) {
-            Optional<User> user = userRepository.findByUserName(bill.getOwner().getUserName());
+            Optional<User> user = userRepository.findByUsername(bill.getOwner().getUsername());
             // Send reminder email
             emailService.sendBillReminderEmail(bill, user.get().getEmail());
             bill.setReminderSent(true);

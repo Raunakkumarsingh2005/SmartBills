@@ -21,10 +21,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -66,7 +62,6 @@ public class BillServiceImpl implements BillService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("400", "File or metadata missing"));
         }
 
-        //  TODO resolve logical error : skipping the category check
         // Map DTO to entity
         Metadata data = metadataMapper.maptoMetadata(metadata);
 
@@ -147,7 +142,7 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<List<Metadata>> getAllBills() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUserName(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         List<Metadata> metadataList = metadataRepository.findByOwner(user);
         return ResponseEntity.status(HttpStatus.OK).body(metadataList);
     }
@@ -212,7 +207,19 @@ public class BillServiceImpl implements BillService {
             String fileExtension = storedFileName.substring(storedFileName.lastIndexOf("."));
             String downloadFileName = originalTitle + fileExtension;
 
+            String contentType = null;
+            try {
+                contentType = Files.probeContentType(filePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
             return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFileName + "\"")
                     .body(resource);
 

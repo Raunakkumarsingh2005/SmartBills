@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoginDto {
     @NotBlank
-    private String userName;
+    private String username;
 
     @NotBlank
     @Size(min = 8, max = 64, message = "Password must be between 8 and 64 characters")
@@ -22,4 +22,3 @@ public class LoginDto {
     )
     private String password;
 }
-

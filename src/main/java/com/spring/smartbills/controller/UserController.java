@@ -29,8 +29,8 @@ public class UserController {
         return userService.forgotPassword(email);
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+    @PostMapping("/reset-password/{token}")
+    public ResponseEntity<?> resetPassword(@PathVariable String token, @RequestParam String newPassword) {
         return userService.resetPassword(token, newPassword);
     }
 }

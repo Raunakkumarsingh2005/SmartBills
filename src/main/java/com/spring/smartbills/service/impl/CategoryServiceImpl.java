@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,5 +30,11 @@ public class CategoryServiceImpl implements CategoryService {
             categoryRepository.save(category);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto(ResponseContants.STATUS_200,ResponseContants.MESSAGE_200));
+    }
+
+    @Override
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(categories);
     }
 }

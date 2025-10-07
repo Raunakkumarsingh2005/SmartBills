@@ -1,4 +1,3 @@
-
 package com.spring.smartbills.dtos;
 
 import jakarta.validation.constraints.Email;
@@ -12,7 +11,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class SignUpDto {
     @NotBlank
-    private String userName;
+    private String username;
 
     @NotBlank
     @Size(min = 8, max = 64, message = "Password must be between 8 and 64 characters")
@@ -26,4 +25,3 @@ public class SignUpDto {
     @Email(message = "Enter a valid email address")
     private String email;
 }
-

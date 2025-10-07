@@ -46,11 +46,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> login(LoginDto loginDto) {
         try {
-            Optional<User> userOptional = userRepository.findByUserName(loginDto.getUserName());
-            
+            Optional<User> userOptional = userRepository.findByUsername(loginDto.getUsername());
+
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserName());
+                UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
                 if (passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
                     Map<String, Object> response = new HashMap<>();
                     response.put("status", "success");
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> register(SignUpDto signUpDto) {
         try {
-            if (userRepository.existsByUserName(signUpDto.getUserName())) {
+            if (userRepository.existsByUsername(signUpDto.getUsername())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new ResponseDto("409", "Username is already taken"));
             }
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
             }
 
             User user = new User();
-            user.setUserName(signUpDto.getUserName());
+            user.setUsername(signUpDto.getUsername());
             user.setEmail(signUpDto.getEmail());
             user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
             user.setEnabled(true);
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
             User savedUser = userRepository.save(user);
             System.out.println("stored in db");
 
-            emailService.sendWelcomeEmail(savedUser.getUserName(), savedUser.getEmail());
+            emailService.sendWelcomeEmail(savedUser.getUsername(), savedUser.getEmail());
             System.out.println("sent email");
 
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -171,4 +171,3 @@ public class UserServiceImpl implements UserService {
         }
     }
 }
-

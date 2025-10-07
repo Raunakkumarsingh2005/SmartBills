@@ -2,12 +2,10 @@ package com.spring.smartbills.security.service;
 
 import com.spring.smartbills.entity.User;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 public class UserDetailsImpl implements UserDetails {
@@ -43,7 +41,7 @@ public class UserDetailsImpl implements UserDetails {
 
         return new UserDetailsImpl(
                 user.getUserId(),
-                user.getUserName(),
+                user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
                 user.getAccountExpiryDate(),

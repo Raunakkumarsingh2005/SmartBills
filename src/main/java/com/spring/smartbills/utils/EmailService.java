@@ -26,12 +26,13 @@ public class EmailService {
                 "http://localhost:3000/reset-password?token=" + token + "\n\n" +
                 "This link will expire in 24 hours.\n\n" +
                 "If you did not request this password reset, please ignore this email.");
+        message.setFrom("raunakkumar.singh05@gmail.com");
         
         mailSender.send(message);
     }
 
     public void sendWelcomeEmail(String username,String email) {
-//        try {
+        try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email );
             message.setSubject("Welcome to SmartBills!");
@@ -40,11 +41,12 @@ public class EmailService {
                     "You can now start managing your invoices and bills.\n\n" +
                     "Best regards,\n" +
                     "The SmartBills Team");
+            message.setFrom("raunakkumar.singh05@gmail.com");
 
             mailSender.send(message);
-//        } catch (Exception e) {
-//            System.out.println("Error sending welcome email: " + e.getStackTrace());
-//        }
+        } catch (Exception e) {
+            System.out.println("Error sending welcome email: " + e.getStackTrace());
+        }
     }
 
     public void sendBillReminderEmail(Metadata bill, String email) {
@@ -59,6 +61,7 @@ public class EmailService {
                 "Please ensure payment is made on time.\n\n" +
                 "Best regards,\n" +
                 "SmartBills Team");
+        message.setFrom("raunakkumar.singh05@gmail.com");
         
         mailSender.send(message);
     }

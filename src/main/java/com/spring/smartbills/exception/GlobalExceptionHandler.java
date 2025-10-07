@@ -1,7 +1,6 @@
 package com.spring.smartbills.exception;
 
 import com.spring.smartbills.dtos.ResponseDto;
-import org.springframework.data.elasticsearch.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

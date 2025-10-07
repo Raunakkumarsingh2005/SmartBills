@@ -4,18 +4,12 @@ import com.spring.smartbills.dtos.BillUploadDto;
 import com.spring.smartbills.entity.Metadata;
 import com.spring.smartbills.entity.User;
 import com.spring.smartbills.repository.UserRepository;
-import com.spring.smartbills.service.BillService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 
 @Component
 @Data
@@ -37,7 +31,7 @@ public class MetadataMapper {
         String username = userDetails.getUsername();
 
 // Now get the User entity from your repository
-        User user = userRepository.findByUserName(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
 // Set the owner in your metadata

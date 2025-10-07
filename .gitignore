@@ -22,6 +22,7 @@ target/
 **/application.yml
 upload/
 uploads/
+.env
 
 ### NetBeans ###
 /nbproject/private/
