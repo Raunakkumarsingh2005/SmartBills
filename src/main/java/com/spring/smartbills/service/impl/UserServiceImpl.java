@@ -10,6 +10,8 @@ import com.spring.smartbills.repository.UserRepository;
 import com.spring.smartbills.security.jwt.JwtUtils;
 import com.spring.smartbills.service.UserService;
 import com.spring.smartbills.utils.EmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,8 @@ public class UserServiceImpl implements UserService {
     private JwtUtils jwtUtils;
     @Autowired
     private UserDetailsService userDetailsService;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public ResponseEntity<?> login(LoginDto loginDto) {
@@ -76,11 +80,15 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> register(SignUpDto signUpDto) {
         try {
             if (userRepository.existsByUsername(signUpDto.getUsername())) {
+                logger.error("username already exists");
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new ResponseDto("409", "Username is already taken"));
+
+
             }
 
             if (userRepository.existsByEmail(signUpDto.getEmail())) {
+                logger.error("email already exists");
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new ResponseDto("409", "Email is already in use"));
             }
@@ -92,15 +100,18 @@ public class UserServiceImpl implements UserService {
             user.setEnabled(true);
 
             User savedUser = userRepository.save(user);
+            logger.info("user details stored in db");
             System.out.println("stored in db");
 
             emailService.sendWelcomeEmail(savedUser.getUsername(), savedUser.getEmail());
+            logger.info("welcome email sent");
             System.out.println("sent email");
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ResponseDto("201", "User registered successfully"));
 
         } catch (Exception e) {
+            logger.error("internal server error {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseDto("500", "Registration failed: "));
         }
@@ -118,9 +129,11 @@ public class UserServiceImpl implements UserService {
                 resetToken.setExpiryDate(LocalDateTime.now().plusHours(24));
                 resetToken.setUsed(false);
 
+                logger.info("Reset Token generated and saved");
                 passwordResetTokenRepository.save(resetToken);
 
                 // Send email with reset link
+                logger.info("requested to sent password reset mail");
                 emailService.sendPasswordResetEmail(email, token);
 
                 return ResponseEntity.ok(new ResponseDto("200", "Password reset email sent"));
